@@ -1,0 +1,37 @@
+-- 1. Número de empregados por departamento e localidade
+CREATE VIEW empregados_por_departamento_localidade AS
+SELECT d.nome AS departamento, l.cidade AS localidade, COUNT(e.empregado_id) AS num_empregados
+FROM departamento d
+JOIN localidade l ON d.localidade_id = l.localidade_id
+JOIN empregado e ON d.departamento_id = e.departamento_id
+GROUP BY d.nome, l.cidade;
+
+-- 2. Lista de departamentos e seus gerentes
+CREATE VIEW departamentos_gerentes AS
+SELECT d.nome AS departamento, e.nome AS gerente
+FROM departamento d
+JOIN empregado e ON d.gerente_id = e.empregado_id;
+
+-- 3. Projetos com maior número de empregados
+CREATE VIEW projetos_mais_empregados AS
+SELECT p.nome AS projeto, COUNT(ep.empregado_id) AS num_empregados
+FROM projeto p
+JOIN empregado_projeto ep ON p.projeto_id = ep.projeto_id
+GROUP BY p.nome
+ORDER BY num_empregados DESC;
+
+-- 4. Lista de projetos, departamentos e gerentes
+CREATE VIEW projetos_departamentos_gerentes AS
+SELECT p.nome AS projeto, d.nome AS departamento, e.nome AS gerente
+FROM projeto p
+JOIN departamento d ON p.departamento_id = d.departamento_id
+JOIN empregado e ON d.gerente_id = e.empregado_id;
+
+-- 5. Quais empregados possuem dependentes e se são gerentes
+CREATE VIEW empregados_com_dependentes AS
+SELECT e.nome AS empregado, 
+       CASE WHEN d.gerente_id IS NOT NULL THEN 'Sim' ELSE 'Não' END AS gerente
+FROM empregado e
+LEFT JOIN dependente dep ON e.empregado_id = dep.empregado_id
+LEFT JOIN departamento d ON e.empregado_id = d.gerente_id
+WHERE dep.dependente_id IS NOT NULL;
